@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routes import transaction, users
+from app.routes import transaction, users, auth
 
 
 app = FastAPI(title="Finance Tracker API")
@@ -12,3 +12,4 @@ def root():
 
 app.include_router(transaction.router)
 app.include_router(users.router)
+app.include_router(auth.router)

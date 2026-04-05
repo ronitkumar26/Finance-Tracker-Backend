@@ -1,4 +1,6 @@
 from pydantic import BaseModel, EmailStr
+from typing import Optional
+
 
 class UserBase(BaseModel):
     name: str
@@ -13,3 +15,12 @@ class UserResponse(UserBase):
 
     class Config:
         from_attributes = True
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str 
+    message: str
+
+class TokenData(BaseModel):
+    id: int
+    role: Optional[str] = None

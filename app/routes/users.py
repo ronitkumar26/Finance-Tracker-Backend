@@ -4,6 +4,9 @@ from typing import List
 from app.database.db import get_db
 from app import models, schemas
 from app.core.security import hash_password
+from app.core import oauth2
+
+
 router = APIRouter(
     prefix="/users",
     tags=["Users"]
@@ -12,7 +15,12 @@ router = APIRouter(
 
 # CREATE USER
 @router.post("/", response_model=schemas.UserResponse, status_code=status.HTTP_201_CREATED)
-def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+def create_user(user: schemas.UserCreate, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_admin)):
+    existing_user = db.query(models.User).filter(models.User.email == user.email).first()
+
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
     hashed_pw = hash_password(user.password)
 
     new_user = models.User(
@@ -32,14 +40,14 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
 # GET ALL USERS
 @router.get("/", response_model=List[schemas.UserResponse])
-def get_users(db: Session = Depends(get_db)):
+def get_users(db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_admin)):
     users = db.query(models.User).all()
     return users
 
 
 # GET SINGLE USER
 @router.get("/{user_id}", response_model=schemas.UserResponse)
-def get_user(user_id: int, db: Session = Depends(get_db)):
+def get_user(user_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_admin)):
     user = db.query(models.User).filter(models.User.id == user_id).first()
 
     if not user:
@@ -50,7 +58,7 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
 
 # UPDATE USER
 @router.put("/{user_id}", response_model=schemas.UserResponse)
-def update_user(user_id: int, user: schemas.UserCreate, db: Session = Depends(get_db)):
+def update_user(user_id: int, user: schemas.UserCreate, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_admin)):
     existing_user = db.query(models.User).filter(models.User.id == user_id).first()
 
     if not existing_user:
@@ -67,7 +75,7 @@ def update_user(user_id: int, user: schemas.UserCreate, db: Session = Depends(ge
 
 # DELETE USER
 @router.delete("/{user_id}")
-def delete_user(user_id: int, db: Session = Depends(get_db)):
+def delete_user(user_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_admin)):
     user = db.query(models.User).filter(models.User.id == user_id).first()
 
     if not user:
