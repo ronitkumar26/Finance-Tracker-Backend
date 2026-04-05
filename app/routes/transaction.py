@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
+from datetime import date
 from app.database.db import get_db
 from app import models, schemas
 from app.core import oauth2
@@ -26,9 +27,25 @@ def create_transaction(transaction: schemas.TransactionCreate,db: Session = Depe
     return new_transaction
 
 @router.get("/", response_model=List[schemas.TransactionResponse])
-def get_transactions(db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
+def get_transactions(db: Session = Depends(get_db),
+                     category: Optional[str] = None, 
+                     type: Optional[str] = None,
+                     start_date: Optional[date] = None,
+                     end_date: Optional[date] = None,
+                     current_user: models.User = Depends(oauth2.get_current_user)):
 
-    transactions = db.query(models.Transaction).all()
+    transactions = db.query(models.Transaction)
+
+    if category:
+        transactions = transactions.filter(models.Transaction.category == category)
+    if type:
+        transactions = transactions.filter(models.Transaction.type == type)
+    if start_date:
+        transactions = transactions.filter(models.Transaction.date >= start_date)
+    if end_date:
+        transactions = transactions.filter(models.Transaction.date <= end_date)
+
+    transactions = transactions.all()
 
     return transactions
 
