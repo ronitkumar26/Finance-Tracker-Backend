@@ -1,4 +1,6 @@
 from fastapi import FastAPI
+from app.routes import transaction
+
 
 app = FastAPI(title="Finance Tracker API")
 
@@ -6,3 +8,6 @@ app = FastAPI(title="Finance Tracker API")
 
 def root():
     return {"message": "Finance Tracker API running"}
+
+
+app.include_router(transaction.router)

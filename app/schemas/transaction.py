@@ -1,18 +1,22 @@
 from pydantic import BaseModel
 from datetime import date
 
-class TransactionCreate(BaseModel):
+class TransactionBase(BaseModel):
     amount: float
     type: str
     category: str
     date: date
-    notes: str
+    notes: str | None = None
 
-class TransactionOut(BaseModel):
+class TransactionCreate(TransactionBase):
+    user_id: int
+
+class TransactionUpdate(TransactionBase):
+    pass
+
+class TransactionResponse(TransactionBase):
     id: int
-    amount: float
-    type: str
-    category: str
+    user_id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
