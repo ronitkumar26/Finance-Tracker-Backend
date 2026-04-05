@@ -2,15 +2,14 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 from app.database.db import get_db
-from app.models.transaction import Transaction
-from app.schemas.transaction import TransactionCreate, TransactionResponse, TransactionUpdate
+from app import models, schemas
 
 router = APIRouter(prefix="/transactions", tags=["Transactions"])
 
-@router.post("/", response_model=TransactionResponse)
-def create_transaction(transaction: TransactionCreate, db: Session = Depends(get_db)):
+@router.post("/", response_model=schemas.TransactionResponse)
+def create_transaction(transaction: schemas.TransactionCreate, db: Session = Depends(get_db)):
 
-    new_transaction = Transaction(**transaction.dict())
+    new_transaction = models.Transaction(**transaction.dict())
 
     db.add(new_transaction)
     db.commit()
@@ -18,28 +17,28 @@ def create_transaction(transaction: TransactionCreate, db: Session = Depends(get
 
     return new_transaction
 
-@router.get("/", response_model=List[TransactionResponse])
+@router.get("/", response_model=List[schemas.TransactionResponse])
 def get_transactions(db: Session = Depends(get_db)):
 
-    transactions = db.query(Transaction).all()
+    transactions = db.query(models.Transaction).all()
 
     return transactions
 
 
-@router.get("/{transaction_id}", response_model=TransactionResponse)
+@router.get("/{transaction_id}", response_model=schemas.TransactionResponse)
 def get_transaction(transaction_id: int, db: Session = Depends(get_db)):
 
-    transaction = db.query(Transaction).filter(Transaction.id == transaction_id).first()
+    transaction = db.query(models.Transaction).filter(models.Transaction.id == transaction_id).first()
 
     if not transaction:
         raise HTTPException(status_code=404, detail="Transaction not found")
 
     return transaction
 
-@router.put("/{transaction_id}", response_model=TransactionResponse)
-def update_transaction(transaction_id: int, updated_data: TransactionUpdate, db: Session = Depends(get_db)):
+@router.put("/{transaction_id}", response_model=schemas.TransactionResponse)
+def update_transaction(transaction_id: int, updated_data: schemas.TransactionUpdate, db: Session = Depends(get_db)):
 
-    transaction = db.query(Transaction).filter(Transaction.id == transaction_id).first()
+    transaction = db.query(models.Transaction).filter(models.Transaction.id == transaction_id).first()
 
     if not transaction:
         raise HTTPException(status_code=404, detail="Transaction not found")
@@ -56,7 +55,7 @@ def update_transaction(transaction_id: int, updated_data: TransactionUpdate, db:
 @router.delete("/{transaction_id}")
 def delete_transaction(transaction_id: int, db: Session = Depends(get_db)):
 
-    transaction = db.query(Transaction).filter(Transaction.id == transaction_id).first()
+    transaction = db.query(models.Transaction).filter(models.Transaction.id == transaction_id).first()
 
     if not transaction:
         raise HTTPException(status_code=404, detail="Transaction not found")
