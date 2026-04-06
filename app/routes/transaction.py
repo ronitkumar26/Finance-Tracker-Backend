@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import date
@@ -32,6 +32,8 @@ def get_transactions(db: Session = Depends(get_db),
                      type: Optional[str] = None,
                      start_date: Optional[date] = None,
                      end_date: Optional[date] = None,
+                     skip: int = Query(0, ge=0),
+                     limit: int = Query(10, ge=1, le=100),
                      current_user: models.User = Depends(oauth2.get_current_user)):
 
     transactions = db.query(models.Transaction)
@@ -45,7 +47,7 @@ def get_transactions(db: Session = Depends(get_db),
     if end_date:
         transactions = transactions.filter(models.Transaction.date <= end_date)
 
-    transactions = transactions.all()
+    transactions = transactions.offset(skip).limit(limit).all()
 
     return transactions
 
