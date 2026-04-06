@@ -60,8 +60,7 @@ Finance-Tracker-Backend/
 ├── alembic.ini
 ├── requirements.txt
 └── README.md
-
----
+```
 
 # Features
 
