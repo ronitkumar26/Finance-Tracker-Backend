@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import date
@@ -11,7 +11,7 @@ router = APIRouter(
     tags=["Transactions"]
     )
 
-@router.post("/", response_model=schemas.TransactionResponse)
+@router.post("/", response_model=schemas.TransactionResponse, status_code=status.HTTP_201_CREATED)
 def create_transaction(transaction: schemas.TransactionCreate,db: Session = Depends(get_db), 
                        current_user: models.User = Depends(oauth2.get_current_user)):
 
@@ -26,7 +26,7 @@ def create_transaction(transaction: schemas.TransactionCreate,db: Session = Depe
 
     return new_transaction
 
-@router.get("/", response_model=List[schemas.TransactionResponse])
+@router.get("/", response_model=List[schemas.TransactionResponse], status_code=status.HTTP_200_OK)
 def get_transactions(db: Session = Depends(get_db),
                      category: Optional[str] = None, 
                      type: Optional[str] = None,
@@ -52,7 +52,7 @@ def get_transactions(db: Session = Depends(get_db),
     return transactions
 
 
-@router.get("/{transaction_id}", response_model=schemas.TransactionResponse)
+@router.get("/{transaction_id}", response_model=schemas.TransactionResponse, status_code=status.HTTP_200_OK)
 def get_transaction(transaction_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
 
     transaction = db.query(models.Transaction).filter(models.Transaction.id == transaction_id).first()
@@ -62,7 +62,7 @@ def get_transaction(transaction_id: int, db: Session = Depends(get_db), current_
 
     return transaction
 
-@router.put("/{transaction_id}", response_model=schemas.TransactionResponse)
+@router.put("/{transaction_id}", response_model=schemas.TransactionResponse, status_code=status.HTTP_200_OK)
 def update_transaction(transaction_id: int, updated_data: schemas.TransactionUpdate, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
 
     if current_user.role not in ["analyst", "admin"]:
@@ -82,7 +82,7 @@ def update_transaction(transaction_id: int, updated_data: schemas.TransactionUpd
     return transaction
 
 
-@router.delete("/{transaction_id}")
+@router.delete("/{transaction_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_transaction(transaction_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_admin)):
 
     transaction = db.query(models.Transaction).filter(models.Transaction.id == transaction_id).first()

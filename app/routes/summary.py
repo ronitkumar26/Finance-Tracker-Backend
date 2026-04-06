@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import func, extract
 from app.core import oauth2
@@ -12,7 +12,7 @@ router = APIRouter(
 
 
 # Total Income
-@router.get("/income")
+@router.get("/income", status_code=status.HTTP_200_OK)
 def total_income(db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
     total = db.query(func.sum(models.Transaction.amount)).filter(
         models.Transaction.type == "income"
@@ -22,7 +22,7 @@ def total_income(db: Session = Depends(get_db), current_user: models.User = Depe
 
 
 # Total Expenses
-@router.get("/expenses")
+@router.get("/expenses", status_code=status.HTTP_200_OK)
 def total_expenses(db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
     total = db.query(func.sum(models.Transaction.amount)).filter(
         models.Transaction.type == "expense"
@@ -32,7 +32,7 @@ def total_expenses(db: Session = Depends(get_db), current_user: models.User = De
 
 
 # Current Balance
-@router.get("/balance")
+@router.get("/balance", status_code=status.HTTP_200_OK)
 def current_balance(db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
 
     income = db.query(func.sum(models.Transaction.amount)).filter(
@@ -51,7 +51,7 @@ def current_balance(db: Session = Depends(get_db), current_user: models.User = D
 
 
 # Category Wise Breakdown
-@router.get("/category")
+@router.get("/category", status_code=status.HTTP_200_OK)
 def category_breakdown(db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
 
     if current_user.role not in ["analyst", "admin"]:
@@ -69,7 +69,7 @@ def category_breakdown(db: Session = Depends(get_db), current_user: models.User 
 
 
 # Monthly Totals
-@router.get("/monthly")
+@router.get("/monthly", status_code=status.HTTP_200_OK)
 def monthly_totals(db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
 
     if current_user.role not in ["analyst", "admin"]:
@@ -92,7 +92,7 @@ def monthly_totals(db: Session = Depends(get_db), current_user: models.User = De
 
 
 # Recent Activity (last 5 transactions)
-@router.get("/recent")
+@router.get("/recent", status_code=status.HTTP_200_OK)
 def recent_activity(db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
 
     transactions = db.query(models.Transaction).order_by(

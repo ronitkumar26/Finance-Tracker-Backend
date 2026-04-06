@@ -39,14 +39,14 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
 
 # GET ALL USERS
-@router.get("/", response_model=List[schemas.UserResponse])
+@router.get("/", response_model=List[schemas.UserResponse], status_code=status.HTTP_200_OK)
 def get_users(db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_admin)):
     users = db.query(models.User).all()
     return users
 
 
 # GET SINGLE USER
-@router.get("/{user_id}", response_model=schemas.UserResponse)
+@router.get("/{user_id}", response_model=schemas.UserResponse, status_code=status.HTTP_200_OK)
 def get_user(user_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_admin)):
     user = db.query(models.User).filter(models.User.id == user_id).first()
 
@@ -57,7 +57,7 @@ def get_user(user_id: int, db: Session = Depends(get_db), current_user: models.U
 
 
 # UPDATE USER
-@router.put("/{user_id}", response_model=schemas.UserResponse)
+@router.put("/{user_id}", response_model=schemas.UserResponse, status_code=status.HTTP_200_OK)
 def update_user(user_id: int, user: schemas.UserCreate, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_admin)):
     existing_user = db.query(models.User).filter(models.User.id == user_id).first()
 
@@ -74,7 +74,7 @@ def update_user(user_id: int, user: schemas.UserCreate, db: Session = Depends(ge
 
 
 # DELETE USER
-@router.delete("/{user_id}")
+@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_user(user_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_admin)):
     user = db.query(models.User).filter(models.User.id == user_id).first()
 
